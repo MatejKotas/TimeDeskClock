@@ -1,211 +1,147 @@
 //*******************************************************************************************************************
-// 								                                         Main Loop 
+// 								                                         Main Loop
 //*******************************************************************************************************************
 void loop()
 {
-  // Test for Sleep ------------------------------------------------*
+  ButtonManager();
+  unsigned long milliTemp = millis();
 
-  currentMillis = millis();
-  OptionModeFlag = false;
+  //From original code
+#if ARDUINO >= 101
+  pinMode(SETBUTTON, INPUT_PULLUP);
+  //    digitalWrite(SETBUTTON, HIGH);
+#else
+  //    digitalWrite(SETBUTTON, HIGH);
+  pinMode(SETBUTTON, INPUT);
+#endif
 
-  if(((currentMillis - SleepTimer) > SleepLimit) && SleepEnable)
-  {
-    
-   if(STATE= 1)                                                    // New for ST Desk Clock - goto Time vs Sleep
-  {
-    SUBSTATE = 1;
-     blinkON = true;
-    blinkFlag = false;
-    blinkMin = false;
-    blinkHour = false;
-  }else
-  {
-       STATE= 1; // was STATE= 99; 
-       SUBSTATE = 0;
-  }
-    
-    SleepTimer = millis();
+  if (inGame) {
+    switch (gameIndex) {
+      case 0:
+        if (getSetButton ()) {
+          BNCplayerPos++;
+          BNCplayerUpdate = true;
+          if (BNCplayerPos == 19) {
+            BNCplayerPos = 0;
+            pixel(19, 0, 0);
+            pixel(18, 0, 0);
+          }
+        }
+        else if (getModeButton()) {
+          BNCplayerPos--;
+          BNCplayerUpdate = true;
+          if (BNCplayerPos == -1) {
+            BNCplayerPos = 18;
+            pixel(0, 0, 0);
+            pixel(1, 0, 0);
+          }
+        }
+        if (BNCplayerUpdate) {
+          BNCplayerUpdate = false;
+          pixel(BNCplayerPos, 0, 1);
+          pixel(BNCplayerPos + 1, 0, 1);
+          if (BNCplayerPos != 0) {
+            pixel(BNCplayerPos - 1, 0, 0);
+          }
+          if (BNCplayerPos != 18) {
+            pixel(BNCplayerPos + 2, 0, 0);
+          }
+        }
+        if (milliTemp > BNCballTimer) {
+          if (Xpos == 0) {
+            dirX = 1;
+          }
+          else if (Xpos == 19) {
+            dirX = -1;
+          }
+          if (Ypos == 6) {
+            dirY = -1;
+          }
+          else if (Ypos == -2) {
+            clearMatrix();
+            displayString("Scor");
+            delay(1000);
+            displayString("e:  ");
+            delay(1000);
+            char temp[4] = "    ";
+            temp[3] = score % 10;
+            score -= temp[3];
+            temp[2] = score / 10;
+            score -= temp[2];
+            temp[1] = score / 100;
+            score -= temp[1];
+            temp[0] = score / 1000;
+            for (int i = 0; i < 4; i++) {
+              temp[i] += '0';
+              if (temp[i] == '0' && i != 4) {
+                temp[i] = ' ';
+              }
+            }
+            displayString(temp);
+            delay(1500);
+            inGame = false;
+            BNCplayerPos = 9;
+            BNCplayerUpdate = true;
+          }
+          if (Ypos == 1) {
+            if (Xpos - 1 == BNCplayerPos && dirX == -1) {
+              dirY = 1;
+              score++;
+            }
+            else if (Xpos == BNCplayerPos && dirX == 1) {
+              dirY = 1;
+              score++;
+            }
+            else if (Xpos + 1 == BNCplayerPos && dirX == 1) {
+              dirY = 1;
+              dirX = -1;
+              score++;
+            }
+            else if (Xpos - 1 == BNCplayerPos + 1 && dirX == -1) {
+              dirY = 1;
+              dirX = 1;
+              score++;
+            }
+          }
 
-  }
+          pixel(Xpos, Ypos, 1);
+          pixel(Xposprev, Yposprev, 0);
+          Xposprev = Xpos;
+          Yposprev = Ypos;
 
-  // Test for Mode Button Press ------------------------------------* 
+          Xpos += dirX;
+          Ypos += dirY;
 
-  bval = !digitalRead(MODEBUTTON);
-  if(bval)
-  {
-    if(ALARMON)
-    {
-    CheckAlarm();
+          BNCballTimer = milliTemp + BNCballSpeed;
+        }
+        break;
     }
-
-    if(ALARM1FLAG)
-    {
-      ALARM1FLAG = false;
-      ALARMON = false;
-      EnableAlarm1(false);
-      STATE = 90;
-      JustWokeUpFlag = false;
-    }
-    else
-    {
-      if(JustWokeUpFlag)
-      {
-        JustWokeUpFlag = false;
-        JustWokeUpFlag2 = true;                                    // Used to supress "Time" text from showing when waking up.
+  }
+  else {
+    displayString(gameNames[gameIndex]);
+    if (getModeButton()) {
+      gameIndex++;
+      if (gameIndex == games) {
+        gameIndex = 0;
       }
-      else
-      {
-      NextStateRequest = true;
+    }
+    if (getSetButton()) {
+      inGame = true;
+      score = 0;
+      switch (gameIndex) {
+        case 0:
+          Xpos = BNCXposDefault;
+          Ypos = BNCTposDefault;
+
+          Xposprev = 0;
+          Yposprev = 2;
+
+          dirX = BNCdirXdefault;
+          dirY = BNCdirYdefault;
+          break;
       }
-   //   SUBSTATE = 99;
-
-      while(bval)
-      {
-          bval = !digitalRead(SETBUTTON);
-          if(bval)
-           {
-            OptionModeFlag = true;
-            NextStateRequest = false;
-            NextSUBStateRequest = false;
-            displayString("SPEC");
-            delay(300);
-           }      
-        bval = !digitalRead(MODEBUTTON);
-      }
-
-      delay(100);
-      SleepTimer = millis();
+      clearMatrix();
     }
-  }
-
-  // Test for SET Button Press ------------------------------------*
-  
-  bval = !digitalRead(SETBUTTON);
-  if(bval && !OptionModeFlag)
-  {
-    NextSUBStateRequest = true;
-
-    while(bval)
-    {
-      
-          bval = !digitalRead(MODEBUTTON);
-          if(bval)
-           {
-            OptionModeFlag = true;
-            NextStateRequest = false;
-            NextSUBStateRequest = false;
-            displayString("SPEC");
-            delay(300);
-           }   
-      
-      
-      bval = !digitalRead(SETBUTTON);
-    }
-    delay(100);
-    SleepTimer = millis();
-  }
- 
-   // Running Blink counter ------------------------------------* 
-  if(blinkFlag)
-  {
-    blinkCounter = blinkCounter +1;
-    if(blinkCounter >blinkTime)                                        // was 150
-    {
-      blinkON = !blinkON;
-      blinkCounter = 0;
-    }
-  }
-  else
-  {
-    blinkON = true;                                                    // Not blinking, just leave the LEDs lit
-  }  
-  
-//*******************************************************************************************************************
-// 								                        Main Loop - State Machine 
-//*******************************************************************************************************************
-
-  switch (STATE) 
-  {
-  case 0:                                                                  // Set-Up
-    STATE = 1;
-    break;
-
-  case 1:                                                                  // Display Time
-    DisplayTimeSub(); 
-    break;
-
-  case 2:                                                                  // Set Time
-    setTimeSub();
-    break; 
-
-  case 3:                                                                  // Config Alarm
-   setAlarmSub();
-    break;
- 
-   case 4:                                                                 // Stop Watch
-    StopWatch();
-    break;
- 
-    
-  case 5:                                                                 // Serial Display                                 
-  DisplaySerialData();
-  break;
-
-  case 6:                                                                 // Graphic Demo                                 
-  graphican();
-  break;
-
-   // ---------------------------------------------------------------   
-  
-  case 90:                                                                  // Alarm Triggered
-  
-    blinkFlag = true;
-    displayString("Beep");
-
-  if(blinkON)
-  {
-    pinMode(SETBUTTON, OUTPUT);
-    tone(SETBUTTON,4000) ;
-    delay(100);
-    noTone(SETBUTTON);
-    digitalWrite(SETBUTTON, HIGH);
-  }
-
-    #if ARDUINO >= 101 
-    pinMode(SETBUTTON, INPUT_PULLUP);
-//    digitalWrite(SETBUTTON, HIGH);
-     #else
-//    digitalWrite(SETBUTTON, HIGH);
-    pinMode(SETBUTTON, INPUT);
-     #endif
-    delay(250);
-
-//    bval = !digitalRead(SETBUTTON);
-    if(NextSUBStateRequest | NextStateRequest)
-    {
-      STATE = 0;
-      SUBSTATE = 0;
- //     NextStateFlag = true;
-      NextStateRequest = false;
-      NextSUBStateRequest = false;      
-      blinkFlag = false;
-    }    
-    break;
-
-    // --------------------------------------------------------------- 
-
-  case 99:                                                                    // Sleep
-    displayString("Nite");
-    delay(500);
-    clearmatrix();
-    GoToSleep();
-    SleepTimer = millis();
-    STATE = 0;
-    SUBSTATE = 0;
-    break;
-
-    // --------------------------------------------------------------- 
-
   }
 }
 
@@ -213,10 +149,3 @@ void loop()
 //*******************************************************************************************************************
 // 								                                 End of Main Loop
 //*******************************************************************************************************************
-
-
-
-
-
-
-
