@@ -76,6 +76,11 @@ bool SetButton = false;
 bool ModeButtonTriggered = false;
 bool SetButtonTriggered = false;
 
+unsigned long ModeButtonTimer = millis();
+unsigned long SetButtonTimer = millis();
+
+#define debounceTime 20 // milliseconds
+
 uint8_t SWDigit4 = 0;
 uint8_t SWDigit3 = 0;
 uint8_t SWDigit2 = 0;

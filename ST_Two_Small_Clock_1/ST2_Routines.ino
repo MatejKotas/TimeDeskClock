@@ -9,19 +9,25 @@
 //*******************************************************************************************************************
 //called in each loop
 void ButtonManager() {
-  SetButton = !digitalRead(SETBUTTON);
-  ModeButton = !digitalRead(MODEBUTTON);
-  if (!SetButton && SetButtonTriggered) {
-    SetButtonTriggered = false;
+  unsigned long milliTemp = millis();
+  if (SetButtonTimer <= milliTemp) {
+    SetButton = !digitalRead(SETBUTTON);
+    if (!SetButton && SetButtonTriggered) {
+      SetButtonTriggered = false;
+    }
   }
-  if (!ModeButton && ModeButtonTriggered) {
-    ModeButtonTriggered = false;
+  if (milliTemp >= ModeButtonTimer) {
+    ModeButton = !digitalRead(MODEBUTTON);
+    if (!ModeButton && ModeButtonTriggered) {
+      ModeButtonTriggered = false;
+    }
   }
 }
 
 bool getSetButton() {
   if (SetButton && !SetButtonTriggered) {
     SetButtonTriggered = true;
+    SetButtonTimer = millis() + debounceTime;
     return (true);
   }
   return (false);
@@ -30,6 +36,7 @@ bool getSetButton() {
 bool getModeButton() {
   if (ModeButton && !ModeButtonTriggered) {
     ModeButtonTriggered = true;
+    ModeButtonTimer = millis() + debounceTime;
     return (true);
   }
   return (false);
