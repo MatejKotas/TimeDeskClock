@@ -45,8 +45,8 @@ void setup()
 
   // Power Reduction - S
   /*power_adc_disable();
-  power_spi_disable();
-  power_usart0_disable();*/
+    power_spi_disable();
+    power_usart0_disable();*/
 
   //wdt_disable();
 

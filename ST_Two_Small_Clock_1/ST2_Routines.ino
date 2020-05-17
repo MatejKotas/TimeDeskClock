@@ -8,33 +8,33 @@
 //                                                     Button Management
 //*******************************************************************************************************************
 //called in each loop
-void ButtonManager(){
+void ButtonManager() {
   SetButton = !digitalRead(SETBUTTON);
   ModeButton = !digitalRead(MODEBUTTON);
-  if(!SetButton && SetButtonTriggered){
+  if (!SetButton && SetButtonTriggered) {
     SetButtonTriggered = false;
   }
-  if(!ModeButton && ModeButtonTriggered){
+  if (!ModeButton && ModeButtonTriggered) {
     ModeButtonTriggered = false;
   }
 }
 
-bool getSetButton(){
-  if(SetButton && !SetButtonTriggered){
+bool getSetButton() {
+  if (SetButton && !SetButtonTriggered) {
     SetButtonTriggered = true;
-    return(true);
+    return (true);
   }
-  return(false);
+  return (false);
 }
 
-bool getModeButton(){
-  if(ModeButton && !ModeButtonTriggered){
+bool getModeButton() {
+  if (ModeButton && !ModeButtonTriggered) {
     ModeButtonTriggered = true;
-    return(true);
+    return (true);
   }
-  return(false);
+  return (false);
 }
-  
+
 //*******************************************************************************************************************
 // 								                                    Beep the piezo
 //*******************************************************************************************************************
@@ -108,7 +108,7 @@ void displayString(char outText[])
   for (int i = 0; i < 4; i++) {
     for (int y = 0; y < 5; y++)
     {
-      LEDMAT[cindex] = LETTERS[outText[i]-32][y];
+      LEDMAT[cindex] = LETTERS[outText[i] - 32][y];
       cindex = cindex + 1;
     }
   }
@@ -158,7 +158,7 @@ void filldigit(int dig, int index)        // Where dig is 1 to 4 and index is po
 void pixel(int x, int y, byte Mode)
 {
   uint8_t temp = LEDMAT[x];
-  switch(Mode){
+  switch (Mode) {
     case 0:
       bitClear(temp, 6 - y);
       break;
