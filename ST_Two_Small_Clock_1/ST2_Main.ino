@@ -66,17 +66,23 @@ void loop()
             char temp[4] = "    ";
             temp[3] = score % 10;
             score -= temp[3];
-            temp[2] = score / 10;
+            temp[2] = score % 100 / 10;
             score -= temp[2];
-            temp[1] = score / 100;
+            temp[1] = score % 1000 / 100;
             score -= temp[1];
             temp[0] = score / 1000;
             for (int i = 0; i < 4; i++) {
               temp[i] += '0';
-              if (temp[i] == '0' && i != 4) {
+            }
+            for (int i = 0; i < 3; i++) {
+              if (temp[i] == '0') {
                 temp[i] = ' ';
               }
+              else{
+                break;
+              }
             }
+            
             displayString(temp);
             delay(1500);
             inGame = false;
