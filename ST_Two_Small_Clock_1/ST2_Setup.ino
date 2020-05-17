@@ -44,11 +44,11 @@ void setup()
   Wire.begin();
 
   // Power Reduction - S
-  /*power_adc_disable();
-    power_spi_disable();
-    power_usart0_disable();*/
+  power_adc_disable();
+  power_spi_disable();
+  power_usart0_disable();
 
-  //wdt_disable();
+  wdt_disable();
 
   if (!digitalRead(SETBUTTON)) {
     lamptest();
