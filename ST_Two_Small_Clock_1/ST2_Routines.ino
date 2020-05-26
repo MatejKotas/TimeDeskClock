@@ -178,3 +178,15 @@ void pixel(int x, int y, byte Mode)
   }
   LEDMAT[x] = temp;
 }
+
+void bounce() {
+  if (Xpos == 0) {
+    dirX = 1;
+  }
+  else if (Xpos == 19) {
+    dirX = -1;
+  }
+  if (Ypos == 6) {
+    dirY = -1;
+  }
+}

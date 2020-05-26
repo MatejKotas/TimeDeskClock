@@ -48,16 +48,8 @@ void loop()
           }
         }
         if (milliTemp > BNCballTimer) {
-          if (Xpos == 0) {
-            dirX = 1;
-          }
-          else if (Xpos == 19) {
-            dirX = -1;
-          }
-          if (Ypos == 6) {
-            dirY = -1;
-          }
-          else if (Ypos == -2) {
+          bounce();
+          if (Ypos == -2) {
             clearMatrix();
             displayString("Scor");
             delay(1000);
@@ -78,17 +70,18 @@ void loop()
               if (temp[i] == '0') {
                 temp[i] = ' ';
               }
-              else{
+              else {
                 break;
               }
             }
-            
+
             displayString(temp);
             delay(1500);
             inGame = false;
             BNCplayerPos = 9;
             BNCplayerUpdate = true;
           }
+
           if (Ypos == 1) {
             if (Xpos - 1 == BNCplayerPos && dirX == -1) {
               dirY = 1;
@@ -108,6 +101,7 @@ void loop()
               dirX = 1;
               score++;
             }
+            bounce();
           }
 
           pixel(Xpos, Ypos, 1);
